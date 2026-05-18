@@ -48,34 +48,44 @@ async function initPage() {
 
 function initAuthUI() {
   if (currentTeacher) {
-    uploadBox.style.display = "block";
-    loginNav.style.display = "none";
-    logoutNav.style.display = "inline-flex";
-    logoutNav.textContent = "Гарах";
+    if (uploadBox) uploadBox.style.display = "block";
+    if (loginNav) loginNav.style.display = "none";
+    if (logoutNav) {
+      logoutNav.style.display = "inline-flex";
+      logoutNav.textContent = "Гарах";
+    }
 
-    authStatus.innerHTML = `
-      <div class="status-box teacher">
-        <strong>${getTeacherDisplayName(currentTeacher)}</strong> багшаар нэвтэрсэн байна.
-        Та бүх материалыг харах, нэмэх, засах, устгах боломжтой.
-      </div>
-    `;
+    if (authStatus) {
+      authStatus.innerHTML = `
+        <div class="status-box teacher">
+          <strong>${getTeacherDisplayName(currentTeacher)}</strong> багшаар нэвтэрсэн байна.
+          Та бүх материалыг харах, нэмэх, засах, устгах боломжтой.
+        </div>
+      `;
+    }
 
-    materialInfoText.textContent =
-      "Та нэвтэрсэн тул public болон private бүх материалууд харагдаж байна.";
+    if (materialInfoText) {
+      materialInfoText.textContent =
+        "Та нэвтэрсэн тул public болон private бүх материалууд харагдаж байна.";
+    }
   } else {
-    uploadBox.style.display = "none";
-    loginNav.href = "login.html";
-    logoutNav.style.display = "none";
+    if (uploadBox) uploadBox.style.display = "none";
+    if (loginNav) loginNav.href = "login.html";
+    if (logoutNav) logoutNav.style.display = "none";
 
-    authStatus.innerHTML = `
-      <div class="status-box public">
-        Та энгийн хэрэглэгчээр үзэж байна. Зөвхөн public материалууд харагдана.
-        <a href="login.html">Багш нэвтрэх</a>
-      </div>
-    `;
+    if (authStatus) {
+      authStatus.innerHTML = `
+        <div class="status-box public">
+          Та энгийн хэрэглэгчээр үзэж байна. Зөвхөн public материалууд харагдана.
+          <a href="login.html">Багш нэвтрэх</a>
+        </div>
+      `;
+    }
 
-    materialInfoText.textContent =
-      "Public сургалтын материалууд харагдаж байна.";
+    if (materialInfoText) {
+      materialInfoText.textContent =
+        "Public сургалтын материалууд харагдаж байна.";
+    }
   }
 }
 
@@ -85,18 +95,20 @@ logoutNav.addEventListener("click", async function (event) {
 });
 
 async function loadMaterials() {
-  const { data, error } = await supabaseClient
+  let query = supabaseClient
     .from("materials")
     .select("*")
     .order("created_at", { ascending: false });
 
+  const { data, error } = await query;
+
   if (error) {
-    console.error(error);
+    console.error("LOAD MATERIALS ERROR:", error);
 
     materialGrid.innerHTML = `
       <div class="empty-message">
-        <h3>Алдаа гарлаа</h3>
-        <p>Материалуудыг серверээс уншиж чадсангүй.</p>
+        <h3>Материалуудыг уншиж чадсангүй</h3>
+        <p>${error.message}</p>
       </div>
     `;
     return;
@@ -287,11 +299,9 @@ materialForm.addEventListener("submit", async function (event) {
 
     const extension = file.name.split(".").pop().toLowerCase();
 
-    const safeFileName =
-      `${crypto.randomUUID()}.${extension}`;
+    const safeFileName = `${crypto.randomUUID()}.${extension}`;
 
-    filePath =
-      `${currentTeacher.id}/${safeFileName}`;
+    filePath = `${currentTeacher.id}/${safeFileName}`;
 
     const { data: uploadData, error: uploadError } =
       await supabaseClient.storage
