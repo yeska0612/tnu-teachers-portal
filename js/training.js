@@ -280,8 +280,10 @@ materialForm.addEventListener("submit", async function (event) {
     fileType =
       file.name.split(".").pop().toUpperCase();
 
+    const extension = file.name.split(".").pop().toLowerCase();
+
     const safeFileName =
-      `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
+      `${Date.now()}-${crypto.randomUUID()}.${extension}`;
 
     filePath =
       `${currentTeacher.id}/${safeFileName}`;
