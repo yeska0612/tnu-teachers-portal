@@ -315,47 +315,6 @@ nav a:hover {
   gap: 20px;
 }
 
-@media (max-width: 900px) {
-  nav {
-    display: none;
-  }
-
-  .hero h1 {
-    font-size: 40px;
-  }
-
-  .stats-grid,
-  .goal-grid,
-  .activity-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .preview-box,
-  .footer-content {
-    flex-direction: column;
-    text-align: center;
-  }
-}
-
-@media (max-width: 560px) {
-  .hero {
-    padding: 80px 0;
-  }
-
-  .hero h1 {
-    font-size: 32px;
-  }
-
-  .hero-buttons {
-    flex-direction: column;
-  }
-
-  .stats-grid,
-  .goal-grid,
-  .activity-grid {
-    grid-template-columns: 1fr;
-  }
-}
 
 .nav-auth-btn {
   height: 40px;
@@ -419,7 +378,45 @@ nav a:hover {
   cursor: pointer;
 }
 
+/* =========================
+   RESPONSIVE DESIGN
+========================= */
+
+@media (max-width: 1024px) {
+  .container {
+    width: 92%;
+  }
+
+  .hero h1 {
+    font-size: 46px;
+  }
+
+  .activity-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 900px) {
+  .nav {
+    height: 82px;
+  }
+
+  .logo h2 {
+    font-size: 16px;
+  }
+
+  .logo p {
+    font-size: 12px;
+  }
+
+  .logo-icon {
+    width: 54px;
+    height: 54px;
+  }
 
   .menu-toggle {
     display: flex;
@@ -429,30 +426,22 @@ nav a:hover {
 
   nav {
     position: absolute;
-    top: 86px;
+    top: 82px;
     right: 20px;
-
     width: 260px;
-
     background: white;
-
     border-radius: 20px;
-
     padding: 20px;
-
-    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
 
     display: flex;
     flex-direction: column;
-
     align-items: flex-start;
     gap: 18px;
 
     opacity: 0;
     visibility: hidden;
-
     transform: translateY(-10px);
-
     transition: 0.25s ease;
   }
 
@@ -464,25 +453,133 @@ nav a:hover {
 
   nav a {
     width: 100%;
+    font-size: 16px;
   }
 
-  .nav-auth-btn {
-    width: 100%;
+  .hero {
+    min-height: 540px;
+    padding: 80px 0;
   }
 
   .hero h1 {
-    font-size: 40px;
+    font-size: 38px;
   }
 
-  .stats-grid,
+  .hero p {
+    font-size: 17px;
+  }
+
+  .stats {
+    margin-top: -35px;
+  }
+
   .goal-grid,
   .activity-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .preview-box,
+  .preview-box {
+    flex-direction: column;
+    text-align: center;
+  }
+
   .footer-content {
     flex-direction: column;
     text-align: center;
+  }
+}
+
+@media (max-width: 560px) {
+  .container {
+    width: 94%;
+  }
+
+  .nav {
+    height: 78px;
+  }
+
+  .logo {
+    gap: 10px;
+  }
+
+  .logo-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+  }
+
+  .logo h2 {
+    font-size: 14px;
+    line-height: 1.25;
+  }
+
+  .logo p {
+    font-size: 11px;
+  }
+
+  .menu-toggle {
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
+  }
+
+  nav {
+    top: 78px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+  }
+
+  .hero {
+    min-height: 480px;
+    padding: 70px 0;
+  }
+
+  .badge {
+    font-size: 13px;
+    padding: 8px 14px;
+  }
+
+  .hero h1 {
+    font-size: 30px;
+  }
+
+  .hero p {
+    font-size: 15px;
+  }
+
+  .stats-grid,
+  .goal-grid,
+  .activity-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    padding: 26px;
+  }
+
+  .section {
+    padding: 65px 0;
+  }
+
+  .section-title h2 {
+    font-size: 28px;
+  }
+
+  .card,
+  .activity-card {
+    padding: 24px;
+  }
+
+  .preview-box {
+    padding: 32px 24px;
+  }
+
+  .preview-box h2 {
+    font-size: 26px;
+  }
+
+  .footer {
+    padding: 24px 0;
   }
 }
