@@ -1,166 +1,203 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="mn">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Сургалтын материал</title>
+    <title>Сургалтын материал</title>
 
-  <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="css/training.css">
-</head>
-<body>
-
-<header class="header">
-  <div class="container nav">
-    <div class="logo">
-      <div class="logo-icon">
-        <img src="logo.jpg" alt="ТНУ лого">
-      </div>
-
-      <div>
-        <h2>Түүх, нийгмийн ухааны бүлэг</h2>
-        <p>Сургалтын материал</p>
-      </div>
-    </div>
-
-    <nav>
-      <a href="index.html">Нүүр</a>
-      <a href="teachers.html">Багш нар</a>
-      <a href="training.html">Сургалт</a>
-      <a href="#" id="loginNav">Нэвтрэх</a>
-      <a href="#" id="logoutNav" style="display:none;">Гарах</a>
-    </nav>
-  </div>
-</header>
-
-<section class="training-hero">
-  <div class="container">
-    <span class="training-badge">Хичээл • Материал • Бичиг баримт</span>
-    <h1>Сургалтын материалын сан</h1>
-    <p>
-      Энгийн хэрэглэгчид зөвхөн public тохиргоотой материалуудыг харна.
-      Харин ТНУ-ийн багш нар нэвтэрснээр бүх материалыг харах, нэмэх,
-      засах, устгах боломжтой.
-    </p>
-  </div>
-</section>
-
-<section class="training-section">
-  <div class="container">
-
-    <div class="auth-status" id="authStatus"></div>
-
-    <div class="tool-box">
-      <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Материал хайх...">
-      </div>
-
-      <div class="filter-buttons">
-        <button class="active" data-filter="Бүгд">Бүгд</button>
-        <button data-filter="Түүх">Түүх</button>
-        <button data-filter="Нийгэм судлал">Нийгэм судлал</button>
-        <button data-filter="Иргэний боловсрол">Иргэний боловсрол</button>
-        <button data-filter="Бичиг баримт">Бичиг баримт</button>
-      </div>
-    </div>
-
-    <div class="upload-box" id="uploadBox" style="display:none;">
-      <div class="upload-header">
-        <h2 id="formTitle">Шинэ материал нэмэх</h2>
-        <p>Материалаа public эсвэл зөвхөн багш нарт харагдах байдлаар тохируулна.</p>
-      </div>
-
-      <form id="materialForm" class="material-form">
-
-        <input type="hidden" id="editIndex">
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Хичээлийн төрөл</label>
-            <select id="materialCategory" required>
-              <option value="">Сонгох</option>
-              <option value="Түүх">Түүх</option>
-              <option value="Нийгэм судлал">Нийгэм судлал</option>
-              <option value="Иргэний боловсрол">Иргэний боловсрол</option>
-              <option value="Бичиг баримт">Бичиг баримт</option>
-            </select>
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/training.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="container nav">
+        <div class="logo">
+          <div class="logo-icon">
+            <img src="logo.jpg" alt="ТНУ лого" />
           </div>
 
-          <div class="form-group">
-            <label>Анги</label>
-            <select id="materialGrade" required>
-              <option value="">Сонгох</option>
-              <option value="6-р анги">6-р анги</option>
-              <option value="7-р анги">7-р анги</option>
-              <option value="8-р анги">8-р анги</option>
-              <option value="9-р анги">9-р анги</option>
-              <option value="10-р анги">10-р анги</option>
-              <option value="11-р анги">11-р анги</option>
-              <option value="12-р анги">12-р анги</option>
-              <option value="Бүлгийн ажил">Бүлгийн ажил</option>
-            </select>
+          <div>
+            <h2>Түүх, нийгмийн ухааны бүлэг</h2>
+            <p>Сургалтын материал</p>
           </div>
         </div>
 
-        <div class="form-group">
-          <label>Материалын гарчиг</label>
-          <input type="text" id="materialTitle" required>
+        <div class="nav-right">
+          <button class="menu-toggle" id="menuToggle">☰</button>
+          <nav id="mainNav">
+            <a href="index.html">Нүүр</a>
+            <a href="teachers.html">Багш нар</a>
+            <a href="training.html">Сургалт</a>
+            <a
+              href="login.html"
+              id="loginNav"
+              class="nav-auth-btn login-btn-nav"
+              >Нэвтрэх</a
+            >
+            <a
+              href="#"
+              id="logoutNav"
+              class="nav-auth-btn logout-btn-nav"
+              style="display: none"
+              >Гарах</a
+            >
+          </nav>
         </div>
+      </div>
+    </header>
 
-        <div class="form-group">
-          <label>Тайлбар</label>
-          <textarea id="materialDescription" required></textarea>
-        </div>
+    <section class="training-hero">
+      <div class="container">
+        <span class="training-badge">Хичээл • Материал • Бичиг баримт</span>
+        <h1>Сургалтын материалын сан</h1>
+        <p>
+          Энгийн хэрэглэгчид зөвхөн public тохиргоотой материалуудыг харна.
+          Харин ТНУ-ийн багш нар нэвтэрснээр бүх материалыг харах, нэмэх, засах,
+          устгах боломжтой.
+        </p>
+      </div>
+    </section>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label>Файл оруулах</label>
-            <input type="file" id="materialFile">
-            <small>Засах үед файл солихгүй бол хоосон орхиж болно.</small>
+    <section class="training-section">
+      <div class="container">
+        <div class="auth-status" id="authStatus"></div>
+
+        <div class="tool-box">
+          <div class="search-box">
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Материал хайх..."
+            />
           </div>
 
-          <div class="form-group">
-            <label>Харагдах тохиргоо</label>
-            <select id="materialVisibility" required>
-              <option value="public">Public — бүх хэрэглэгч харна</option>
-              <option value="private">Private — зөвхөн багш нар харна</option>
-            </select>
+          <div class="filter-buttons">
+            <button class="active" data-filter="Бүгд">Бүгд</button>
+            <button data-filter="Түүх">Түүх</button>
+            <button data-filter="Нийгэм судлал">Нийгэм судлал</button>
+            <button data-filter="Иргэний боловсрол">Иргэний боловсрол</button>
+            <button data-filter="Бичиг баримт">Бичиг баримт</button>
           </div>
         </div>
 
-        <div class="form-actions">
-          <button type="submit" class="submit-btn">Хадгалах</button>
-          <button type="button" class="cancel-btn" id="cancelEditBtn">Цуцлах</button>
+        <div class="upload-box" id="uploadBox" style="display: none">
+          <div class="upload-header">
+            <h2 id="formTitle">Шинэ материал нэмэх</h2>
+            <p>
+              Материалаа public эсвэл зөвхөн багш нарт харагдах байдлаар
+              тохируулна.
+            </p>
+          </div>
+
+          <form id="materialForm" class="material-form">
+            <input type="hidden" id="editIndex" />
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Хичээлийн төрөл</label>
+                <select id="materialCategory" required>
+                  <option value="">Сонгох</option>
+                  <option value="Түүх">Түүх</option>
+                  <option value="Нийгэм судлал">Нийгэм судлал</option>
+                  <option value="Иргэний боловсрол">Иргэний боловсрол</option>
+                  <option value="Бичиг баримт">Бичиг баримт</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Анги</label>
+                <select id="materialGrade" required>
+                  <option value="">Сонгох</option>
+                  <option value="6-р анги">6-р анги</option>
+                  <option value="7-р анги">7-р анги</option>
+                  <option value="8-р анги">8-р анги</option>
+                  <option value="9-р анги">9-р анги</option>
+                  <option value="10-р анги">10-р анги</option>
+                  <option value="11-р анги">11-р анги</option>
+                  <option value="12-р анги">12-р анги</option>
+                  <option value="Бүлгийн ажил">Бүлгийн ажил</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Материалын гарчиг</label>
+              <input type="text" id="materialTitle" required />
+            </div>
+
+            <div class="form-group">
+              <label>Тайлбар</label>
+              <textarea id="materialDescription" required></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Файл оруулах</label>
+                <input type="file" id="materialFile" />
+                <small>Засах үед файл солихгүй бол хоосон орхиж болно.</small>
+              </div>
+
+              <div class="form-group">
+                <label>Харагдах тохиргоо</label>
+                <select id="materialVisibility" required>
+                  <option value="public">Public — бүх хэрэглэгч харна</option>
+                  <option value="private">
+                    Private — зөвхөн багш нар харна
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="submit-btn">Хадгалах</button>
+              <button type="button" class="cancel-btn" id="cancelEditBtn">
+                Цуцлах
+              </button>
+            </div>
+          </form>
         </div>
 
-      </form>
+        <div class="section-heading">
+          <h2>Сургалтын материалууд</h2>
+          <p id="materialInfoText">
+            Public сургалтын материалууд харагдаж байна.
+          </p>
+        </div>
+
+        <div class="material-grid" id="materialGrid"></div>
+
+        <div class="see-more-box">
+          <button id="seeMoreBtn" class="see-more-btn">See more...</button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="container footer-content">
+        <p>© 2026 Түүх, нийгмийн ухааны багш нарын бүлэг</p>
+        <p>Сургалтын материалын сан</p>
+      </div>
+    </footer>
+
+    <div class="preview-modal" id="previewModal">
+      <div class="preview-overlay" id="previewOverlay"></div>
+
+      <div class="preview-box">
+        <div class="preview-top">
+          <h3 id="previewTitle">Материал preview</h3>
+
+          <button id="closePreviewBtn">✕</button>
+        </div>
+
+        <iframe id="previewFrame" src="" frameborder="0"> </iframe>
+      </div>
     </div>
 
-    <div class="section-heading">
-      <h2>Сургалтын материалууд</h2>
-      <p id="materialInfoText">Public сургалтын материалууд харагдаж байна.</p>
-    </div>
-
-    <div class="material-grid" id="materialGrid"></div>
-
-    <div class="see-more-box">
-      <button id="seeMoreBtn" class="see-more-btn">See more...</button>
-    </div>
-
-  </div>
-</section>
-
-<footer class="footer">
-  <div class="container footer-content">
-    <p>© 2026 Түүх, нийгмийн ухааны багш нарын бүлэг</p>
-    <p>Сургалтын материалын сан</p>
-  </div>
-</footer>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabaseClient.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/training.js"></script>
-</body>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabaseClient.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/training.js"></script>
+    <script src="js/main.js"></script>
+  </body>
 </html>

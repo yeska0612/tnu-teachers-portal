@@ -17,6 +17,11 @@ const loginNav = document.getElementById("loginNav");
 const logoutNav = document.getElementById("logoutNav");
 const cancelEditBtn = document.getElementById("cancelEditBtn");
 const formTitle = document.getElementById("formTitle");
+const previewModal = document.getElementById("previewModal");
+const previewFrame = document.getElementById("previewFrame");
+const previewTitle = document.getElementById("previewTitle");
+const closePreviewBtn = document.getElementById("closePreviewBtn");
+const previewOverlay = document.getElementById("previewOverlay");
 
 function getTeacherDisplayName(user) {
   const teacherNames = {
@@ -26,7 +31,7 @@ function getTeacherDisplayName(user) {
     "baasanjargal2000@gmail.com": "С. Баасанжаргал",
     "doljinsurend89@gmail.com": "Д. Должинсүрэн",
     "sars2372@gmail.com": "М. Саранчимэг",
-    "odnood45@gmail.com": "Д. Одонтуяа"
+    "odnood45@gmail.com": "Д. Одонтуяа",
   };
 
   return teacherNames[user.email] || user.email;
@@ -45,6 +50,7 @@ function initAuthUI() {
     uploadBox.style.display = "block";
     loginNav.style.display = "none";
     logoutNav.style.display = "inline-block";
+    logoutNav.textContent = "Гарах";
 
     authStatus.innerHTML = `
       <div class="status-box teacher">
@@ -67,11 +73,12 @@ function initAuthUI() {
       </div>
     `;
 
-    materialInfoText.textContent = "Public сургалтын материалууд харагдаж байна.";
+    materialInfoText.textContent =
+      "Public сургалтын материалууд харагдаж байна.";
   }
 }
 
-logoutNav.addEventListener("click", async function(event) {
+logoutNav.addEventListener("click", async function (event) {
   event.preventDefault();
   await logoutTeacher();
 });
@@ -101,7 +108,7 @@ async function loadMaterials() {
 function getFilteredMaterials() {
   const keyword = searchInput.value.toLowerCase().trim();
 
-  return materials.filter(function(material) {
+  return materials.filter(function (material) {
     const filterOk =
       currentFilter === "Бүгд" || material.category === currentFilter;
 
@@ -137,8 +144,7 @@ function formatDate(dateValue) {
 function getPublicUrl(filePath) {
   if (!filePath) return "#";
 
-  const { data } = supabaseClient
-    .storage
+  const { data } = supabaseClient.storage
     .from("materials")
     .getPublicUrl(filePath);
 
@@ -164,12 +170,11 @@ function renderMaterials() {
     return;
   }
 
-  list.forEach(function(material) {
+  list.forEach(function (material) {
     const fileColor = getFileColor(material.file_type);
     const fileUrl = getPublicUrl(material.file_path);
 
-    const canEdit =
-      currentTeacher && currentTeacher.id === material.teacher_id;
+    const canEdit = currentTeacher && currentTeacher.id === material.teacher_id;
 
     const card = document.createElement("div");
     card.className = "material-card";
@@ -197,9 +202,15 @@ function renderMaterials() {
         </div>
 
         <div class="material-actions">
-          <a href="${fileUrl}" class="view-btn" target="_blank">
+          <button
+            class="view-btn"
+            onclick="previewMaterial(
+              '${fileUrl}',
+              '${material.file_type}',
+              '${material.title}'
+            )">
             Материал харах
-          </a>
+          </button>
 
           ${
             canEdit
@@ -224,9 +235,9 @@ function renderMaterials() {
   }
 }
 
-document.querySelectorAll(".filter-buttons button").forEach(function(button) {
-  button.addEventListener("click", function() {
-    document.querySelectorAll(".filter-buttons button").forEach(function(btn) {
+document.querySelectorAll(".filter-buttons button").forEach(function (button) {
+  button.addEventListener("click", function () {
+    document.querySelectorAll(".filter-buttons button").forEach(function (btn) {
       btn.classList.remove("active");
     });
 
@@ -238,17 +249,17 @@ document.querySelectorAll(".filter-buttons button").forEach(function(button) {
   });
 });
 
-searchInput.addEventListener("input", function() {
+searchInput.addEventListener("input", function () {
   isExpanded = false;
   renderMaterials();
 });
 
-seeMoreBtn.addEventListener("click", function() {
+seeMoreBtn.addEventListener("click", function () {
   isExpanded = !isExpanded;
   renderMaterials();
 });
 
-materialForm.addEventListener("submit", async function(event) {
+materialForm.addEventListener("submit", async function (event) {
   event.preventDefault();
 
   if (!currentTeacher) {
@@ -268,8 +279,7 @@ materialForm.addEventListener("submit", async function(event) {
 
     filePath = `${currentTeacher.id}/${Date.now()}-${file.name}`;
 
-    const { error: uploadError } = await supabaseClient
-      .storage
+    const { error: uploadError } = await supabaseClient.storage
       .from("materials")
       .upload(filePath, file);
 
@@ -297,7 +307,7 @@ materialForm.addEventListener("submit", async function(event) {
 
     file_name: fileName || null,
     file_path: filePath,
-    file_type: fileType || getFileType(filePath)
+    file_type: fileType || getFileType(filePath),
   };
 
   if (editingId) {
@@ -329,7 +339,7 @@ materialForm.addEventListener("submit", async function(event) {
 });
 
 function editMaterial(id) {
-  const material = materials.find(function(item) {
+  const material = materials.find(function (item) {
     return item.id === id;
   });
 
@@ -348,7 +358,7 @@ function editMaterial(id) {
 
   window.scrollTo({
     top: uploadBox.offsetTop - 100,
-    behavior: "smooth"
+    behavior: "smooth",
   });
 }
 
@@ -369,10 +379,7 @@ async function deleteMaterial(id, filePath) {
   }
 
   if (filePath) {
-    await supabaseClient
-      .storage
-      .from("materials")
-      .remove([filePath]);
+    await supabaseClient.storage.from("materials").remove([filePath]);
   }
 
   await loadMaterials();
@@ -387,5 +394,44 @@ function resetForm() {
 }
 
 cancelEditBtn.addEventListener("click", resetForm);
+
+function previewMaterial(url, type, title) {
+
+  previewTitle.textContent = title;
+
+  const upperType = (type || "FILE").toUpperCase();
+
+  if (
+    upperType === "PDF"
+  ) {
+    previewFrame.src = url;
+  }
+  else {
+    previewFrame.src =
+      `https://docs.google.com/gview?embedded=1&url=${encodeURIComponent(url)}`;
+  }
+
+  previewModal.classList.add("active");
+
+  document.body.style.overflow = "hidden";
+}
+
+function closePreview() {
+  previewModal.classList.remove("active");
+
+  previewFrame.src = "";
+
+  document.body.style.overflow = "auto";
+}
+
+closePreviewBtn.addEventListener(
+  "click",
+  closePreview
+);
+
+previewOverlay.addEventListener(
+  "click",
+  closePreview
+);
 
 initPage();
