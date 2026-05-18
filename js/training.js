@@ -59,7 +59,7 @@ function initAuthUI() {
       authStatus.innerHTML = `
         <div class="status-box teacher">
           <strong>${getTeacherDisplayName(currentTeacher)}</strong> багшаар нэвтэрсэн байна.
-          Та бүх материалыг харах, нэмэх, засах, устгах боломжтой.
+          Та өөрийн бүх материалыг харах, нэмэх, засах, устгах боломжтой.
         </div>
       `;
     }
