@@ -401,14 +401,14 @@ function previewMaterial(url, type, title) {
 
   const upperType = (type || "FILE").toUpperCase();
 
-  if (
-    upperType === "PDF"
-  ) {
+  if (upperType === "PDF") {
+
     previewFrame.src = url;
-  }
-  else {
-    previewFrame.src =
-      `https://docs.google.com/gview?embedded=1&url=${encodeURIComponent(url)}`;
+
+  } else {
+
+    window.open(url, "_blank");
+    return;
   }
 
   previewModal.classList.add("active");
