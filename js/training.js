@@ -17,6 +17,7 @@ const loginNav = document.getElementById("loginNav");
 const logoutNav = document.getElementById("logoutNav");
 const cancelEditBtn = document.getElementById("cancelEditBtn");
 const formTitle = document.getElementById("formTitle");
+
 const previewModal = document.getElementById("previewModal");
 const previewFrame = document.getElementById("previewFrame");
 const previewTitle = document.getElementById("previewTitle");
@@ -31,7 +32,7 @@ function getTeacherDisplayName(user) {
     "baasanjargal2000@gmail.com": "С. Баасанжаргал",
     "doljinsurend89@gmail.com": "Д. Должинсүрэн",
     "sars2372@gmail.com": "М. Саранчимэг",
-    "odnood45@gmail.com": "Д. Одонтуяа",
+    "odnood45@gmail.com": "Д. Одонтуяа"
   };
 
   return teacherNames[user.email] || user.email;
@@ -49,7 +50,7 @@ function initAuthUI() {
   if (currentTeacher) {
     uploadBox.style.display = "block";
     loginNav.style.display = "none";
-    logoutNav.style.display = "inline-block";
+    logoutNav.style.display = "inline-flex";
     logoutNav.textContent = "Гарах";
 
     authStatus.innerHTML = `
@@ -98,7 +99,6 @@ async function loadMaterials() {
         <p>Материалуудыг серверээс уншиж чадсангүй.</p>
       </div>
     `;
-
     return;
   }
 
@@ -144,7 +144,8 @@ function formatDate(dateValue) {
 function getPublicUrl(filePath) {
   if (!filePath) return "#";
 
-  const { data } = supabaseClient.storage
+  const { data } = supabaseClient
+    .storage
     .from("materials")
     .getPublicUrl(filePath);
 
@@ -173,7 +174,6 @@ function renderMaterials() {
   list.forEach(function (material) {
     const fileColor = getFileColor(material.file_type);
     const fileUrl = getPublicUrl(material.file_path);
-
     const canEdit = currentTeacher && currentTeacher.id === material.teacher_id;
 
     const card = document.createElement("div");
@@ -202,27 +202,35 @@ function renderMaterials() {
         </div>
 
         <div class="material-actions">
-          <button
-            class="view-btn"
-            onclick="previewMaterial(
-              '${fileUrl}',
-              '${material.file_type}',
-              '${material.title}'
-            )">
+          <button class="view-btn preview-btn">
             Материал харах
           </button>
 
           ${
             canEdit
               ? `
-                <button class="edit-btn" onclick="editMaterial('${material.id}')">Засах</button>
-                <button class="delete-btn" onclick="deleteMaterial('${material.id}', '${material.file_path}')">Устгах</button>
+                <button class="edit-btn">Засах</button>
+                <button class="delete-btn">Устгах</button>
               `
               : ""
           }
         </div>
       </div>
     `;
+
+    card.querySelector(".preview-btn").addEventListener("click", function () {
+      previewMaterial(fileUrl, material.file_type, material.title);
+    });
+
+    if (canEdit) {
+      card.querySelector(".edit-btn").addEventListener("click", function () {
+        editMaterial(material.id);
+      });
+
+      card.querySelector(".delete-btn").addEventListener("click", function () {
+        deleteMaterial(material.id, material.file_path);
+      });
+    }
 
     materialGrid.appendChild(card);
   });
@@ -274,34 +282,29 @@ materialForm.addEventListener("submit", async function (event) {
   let fileType = null;
 
   if (file) {
-
     fileName = file.name;
-
-    fileType =
-      file.name.split(".").pop().toUpperCase();
+    fileType = getFileType(file.name);
 
     const extension = file.name.split(".").pop().toLowerCase();
 
     const safeFileName =
-      `${Date.now()}-${crypto.randomUUID()}.${extension}`;
+      `${crypto.randomUUID()}.${extension}`;
 
     filePath =
       `${currentTeacher.id}/${safeFileName}`;
 
-    const {
-      data: uploadData,
-      error: uploadError
-    } = await supabaseClient.storage
-      .from("materials")
-      .upload(filePath, file, {
-        upsert: true
-      });
+    const { data: uploadData, error: uploadError } =
+      await supabaseClient.storage
+        .from("materials")
+        .upload(filePath, file, {
+          contentType: file.type,
+          upsert: true
+        });
 
     console.log("UPLOAD DATA:", uploadData);
     console.log("UPLOAD ERROR:", uploadError);
 
     if (uploadError) {
-
       console.error(uploadError);
 
       alert(
@@ -328,9 +331,9 @@ materialForm.addEventListener("submit", async function (event) {
     teacher_id: currentTeacher.id,
     teacher_name: getTeacherDisplayName(currentTeacher),
 
-    file_name: fileName || null,
+    file_name: fileName,
     file_path: filePath,
-    file_type: fileType || getFileType(filePath),
+    file_type: fileType || getFileType(filePath)
   };
 
   if (editingId) {
@@ -359,6 +362,8 @@ materialForm.addEventListener("submit", async function (event) {
   resetForm();
   await loadMaterials();
   renderMaterials();
+
+  alert("Материал амжилттай хадгалагдлаа.");
 });
 
 function editMaterial(id) {
@@ -381,7 +386,7 @@ function editMaterial(id) {
 
   window.scrollTo({
     top: uploadBox.offsetTop - 100,
-    behavior: "smooth",
+    behavior: "smooth"
   });
 }
 
@@ -402,7 +407,10 @@ async function deleteMaterial(id, filePath) {
   }
 
   if (filePath) {
-    await supabaseClient.storage.from("materials").remove([filePath]);
+    await supabaseClient
+      .storage
+      .from("materials")
+      .remove([filePath]);
   }
 
   await loadMaterials();
@@ -419,42 +427,25 @@ function resetForm() {
 cancelEditBtn.addEventListener("click", resetForm);
 
 function previewMaterial(url, type, title) {
-
-  previewTitle.textContent = title;
-
   const upperType = (type || "FILE").toUpperCase();
 
   if (upperType === "PDF") {
-
+    previewTitle.textContent = title;
     previewFrame.src = url;
-
+    previewModal.classList.add("active");
+    document.body.style.overflow = "hidden";
   } else {
-
     window.open(url, "_blank");
-    return;
   }
-
-  previewModal.classList.add("active");
-
-  document.body.style.overflow = "hidden";
 }
 
 function closePreview() {
   previewModal.classList.remove("active");
-
   previewFrame.src = "";
-
   document.body.style.overflow = "auto";
 }
 
-closePreviewBtn.addEventListener(
-  "click",
-  closePreview
-);
-
-previewOverlay.addEventListener(
-  "click",
-  closePreview
-);
+closePreviewBtn.addEventListener("click", closePreview);
+previewOverlay.addEventListener("click", closePreview);
 
 initPage();
