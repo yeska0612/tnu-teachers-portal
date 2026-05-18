@@ -274,18 +274,39 @@ materialForm.addEventListener("submit", async function (event) {
   let fileType = null;
 
   if (file) {
+
     fileName = file.name;
-    fileType = getFileType(file.name);
 
-    filePath = `${currentTeacher.id}/${Date.now()}-${file.name}`;
+    fileType =
+      file.name.split(".").pop().toUpperCase();
 
-    const { error: uploadError } = await supabaseClient.storage
+    const safeFileName =
+      `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
+
+    filePath =
+      `${currentTeacher.id}/${safeFileName}`;
+
+    const {
+      data: uploadData,
+      error: uploadError
+    } = await supabaseClient.storage
       .from("materials")
-      .upload(filePath, file);
+      .upload(filePath, file, {
+        upsert: true
+      });
+
+    console.log("UPLOAD DATA:", uploadData);
+    console.log("UPLOAD ERROR:", uploadError);
 
     if (uploadError) {
+
       console.error(uploadError);
-      alert("Файл upload хийхэд алдаа гарлаа.");
+
+      alert(
+        "Файл upload хийхэд алдаа гарлаа:\n" +
+        uploadError.message
+      );
+
       return;
     }
   }
