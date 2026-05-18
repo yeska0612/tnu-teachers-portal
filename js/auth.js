@@ -1,77 +1,68 @@
-const teacherAccounts = [
-  {
-    id: "teacher01",
-    password: "1234",
-    name: "М. Соёл-Эрдэнэ",
-    email: "erdeneb967@gmail.com"
-  },
-  {
-    id: "teacher02",
-    password: "1234",
-    name: "М. Едил",
-    email: "m.edil999999@gmail.com"
-  },
-  {
-    id: "teacher03",
-    password: "1234",
-    name: "Т. Оюунчимэг",
-    email: "oyunchimeg@school.mn"
-  },
-  {
-    id: "teacher04",
-    password: "1234",
-    name: "С. Баасанжаргал",
-    email: "baasanjargal2000@gmail.com"
-  },
-  {
-    id: "teacher05",
-    password: "1234",
-    name: "Д. Должинсүрэн",
-    email: "doljinsurend89@gmail.com"
-  },
-  {
-    id: "teacher06",
-    password: "1234",
-    name: "М. Саранчимэг",
-    email: "sars2372@gmail.com"
-  },
-  {
-    id: "teacher07",
-    password: "1234",
-    name: "Д. Одонтуяа",
-    email: "odnood45@gmail.com"
-  }
-];
-
 const loginForm = document.getElementById("loginForm");
 
+/* =========================
+   LOGIN
+========================= */
+
 if (loginForm) {
-  loginForm.addEventListener("submit", function(event) {
+  loginForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
-    const id = document.getElementById("teacherId").value.trim();
-    const password = document.getElementById("teacherPassword").value.trim();
-    const error = document.getElementById("loginError");
+    const email = document
+      .getElementById("teacherId")
+      .value.trim();
 
-    const teacher = teacherAccounts.find(function(account) {
-      return account.id === id && account.password === password;
-    });
+    const password = document
+      .getElementById("teacherPassword")
+      .value.trim();
 
-    if (!teacher) {
-      error.textContent = "ID эсвэл нууц үг буруу байна.";
+    const errorText = document.getElementById("loginError");
+
+    errorText.textContent = "";
+
+    const { data, error } =
+      await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
+
+    if (error) {
+      errorText.textContent =
+        "Имэйл эсвэл нууц үг буруу байна.";
       return;
     }
 
-    localStorage.setItem("currentTeacher", JSON.stringify(teacher));
     window.location.href = "training.html";
   });
 }
 
-function getCurrentTeacher() {
-  return JSON.parse(localStorage.getItem("currentTeacher"));
+/* =========================
+   CURRENT USER
+========================= */
+
+async function getCurrentTeacher() {
+  const { data, error } =
+    await supabaseClient.auth.getUser();
+
+  if (error) {
+    console.error(error);
+    return null;
+  }
+
+  return data.user;
 }
 
-function logoutTeacher() {
-  localStorage.removeItem("currentTeacher");
+/* =========================
+   LOGOUT
+========================= */
+
+async function logoutTeacher() {
+  const { error } =
+    await supabaseClient.auth.signOut();
+
+  if (error) {
+    console.error(error);
+  }
+
   window.location.href = "training.html";
 }

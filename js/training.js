@@ -1,45 +1,10 @@
-const defaultMaterials = [
-  {
-    category: "Түүх",
-    grade: "10-р анги",
-    title: "Монголын тусгаар тогтнолын түүх",
-    description: "Ээлжит хичээлийн төлөвлөгөө болон сурагчийн ажлын хуудас.",
-    teacher: "Б. Энхтуяа",
-    date: "2026.04.20",
-    fileType: "PDF",
-    fileData: "#",
-    visibility: "public"
-  },
-  {
-    category: "Нийгэм судлал",
-    grade: "11-р анги",
-    title: "Хүний эрх ба үүрэг",
-    description: "Нэгж хичээлийн хөтөлбөр, хэлэлцүүлгийн асуулт, үнэлгээний рубрик.",
-    teacher: "Д. Мөнх-Эрдэнэ",
-    date: "2026.04.18",
-    fileType: "DOC",
-    fileData: "#",
-    visibility: "private"
-  },
-  {
-    category: "Иргэний боловсрол",
-    grade: "9-р анги",
-    title: "Иргэний оролцооны хэлбэрүүд",
-    description: "Хичээлийн слайд, багаар ажиллах даалгавар, дүгнэлтийн асуулт.",
-    teacher: "П. Номин",
-    date: "2026.04.15",
-    fileType: "PPT",
-    fileData: "#",
-    visibility: "public"
-  }
-];
-
-let materials = JSON.parse(localStorage.getItem("materials")) || defaultMaterials;
+let currentTeacher = null;
+let materials = [];
 let currentFilter = "Бүгд";
-let visibleCount = 4;
 let isExpanded = false;
-
-const currentTeacher = getCurrentTeacher();
+let visibleCount = 4;
+let editingId = null;
+let editingFilePath = null;
 
 const materialGrid = document.getElementById("materialGrid");
 const materialForm = document.getElementById("materialForm");
@@ -53,6 +18,28 @@ const logoutNav = document.getElementById("logoutNav");
 const cancelEditBtn = document.getElementById("cancelEditBtn");
 const formTitle = document.getElementById("formTitle");
 
+function getTeacherDisplayName(user) {
+  const teacherNames = {
+    "erdeneb967@gmail.com": "М. Соёл-Эрдэнэ",
+    "m.edil999999@gmail.com": "М. Едил",
+    "oyunchimeg@school.mn": "Т. Оюунчимэг",
+    "baasanjargal2000@gmail.com": "С. Баасанжаргал",
+    "doljinsurend89@gmail.com": "Д. Должинсүрэн",
+    "sars2372@gmail.com": "М. Саранчимэг",
+    "odnood45@gmail.com": "Д. Одонтуяа"
+  };
+
+  return teacherNames[user.email] || user.email;
+}
+
+async function initPage() {
+  currentTeacher = await getCurrentTeacher();
+
+  initAuthUI();
+  await loadMaterials();
+  renderMaterials();
+}
+
 function initAuthUI() {
   if (currentTeacher) {
     uploadBox.style.display = "block";
@@ -61,12 +48,13 @@ function initAuthUI() {
 
     authStatus.innerHTML = `
       <div class="status-box teacher">
-        <strong>${currentTeacher.name}</strong> багшаар нэвтэрсэн байна.
+        <strong>${getTeacherDisplayName(currentTeacher)}</strong> багшаар нэвтэрсэн байна.
         Та бүх материалыг харах, нэмэх, засах, устгах боломжтой.
       </div>
     `;
 
-    materialInfoText.textContent = "Та нэвтэрсэн тул public болон private бүх материалууд харагдаж байна.";
+    materialInfoText.textContent =
+      "Та нэвтэрсэн тул public болон private бүх материалууд харагдаж байна.";
   } else {
     uploadBox.style.display = "none";
     loginNav.href = "login.html";
@@ -83,64 +71,87 @@ function initAuthUI() {
   }
 }
 
-logoutNav.addEventListener("click", function(event) {
+logoutNav.addEventListener("click", async function(event) {
   event.preventDefault();
-  logoutTeacher();
+  await logoutTeacher();
 });
 
-function saveMaterials() {
-  localStorage.setItem("materials", JSON.stringify(materials));
+async function loadMaterials() {
+  const { data, error } = await supabaseClient
+    .from("materials")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+
+    materialGrid.innerHTML = `
+      <div class="empty-message">
+        <h3>Алдаа гарлаа</h3>
+        <p>Материалуудыг серверээс уншиж чадсангүй.</p>
+      </div>
+    `;
+
+    return;
+  }
+
+  materials = data || [];
 }
 
-function getTodayDate() {
-  const today = new Date();
-  return `${today.getFullYear()}.${String(today.getMonth() + 1).padStart(2, "0")}.${String(today.getDate()).padStart(2, "0")}`;
-}
-
-function getFileType(fileName) {
-  if (!fileName) return "FILE";
-
-  const ext = fileName.split(".").pop().toUpperCase();
-
-  if (ext === "PDF") return "PDF";
-  if (ext === "DOC" || ext === "DOCX") return "DOC";
-  if (ext === "PPT" || ext === "PPTX") return "PPT";
-  if (ext === "XLS" || ext === "XLSX") return "XLS";
-
-  return ext;
-}
-
-function getFileColor(type) {
-  if (type === "PDF") return "blue";
-  if (type === "DOC") return "green";
-  if (type === "PPT") return "orange";
-  if (type === "XLS") return "purple";
-  return "gray";
-}
-
-function getVisibleMaterials() {
+function getFilteredMaterials() {
   const keyword = searchInput.value.toLowerCase().trim();
 
   return materials.filter(function(material) {
-    const permissionOk = currentTeacher || material.visibility === "public";
-    const filterOk = currentFilter === "Бүгд" || material.category === currentFilter;
+    const filterOk =
+      currentFilter === "Бүгд" || material.category === currentFilter;
 
     const searchOk =
       material.title.toLowerCase().includes(keyword) ||
       material.description.toLowerCase().includes(keyword) ||
-      material.teacher.toLowerCase().includes(keyword) ||
+      material.teacher_name.toLowerCase().includes(keyword) ||
       material.grade.toLowerCase().includes(keyword);
 
-    return permissionOk && filterOk && searchOk;
+    return filterOk && searchOk;
   });
 }
 
+function getFileType(fileName) {
+  if (!fileName) return "FILE";
+  return fileName.split(".").pop().toUpperCase();
+}
+
+function getFileColor(type) {
+  if (type === "PDF") return "blue";
+  if (type === "DOC" || type === "DOCX") return "green";
+  if (type === "PPT" || type === "PPTX") return "orange";
+  if (type === "XLS" || type === "XLSX") return "purple";
+  return "gray";
+}
+
+function formatDate(dateValue) {
+  const date = new Date(dateValue);
+
+  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function getPublicUrl(filePath) {
+  if (!filePath) return "#";
+
+  const { data } = supabaseClient
+    .storage
+    .from("materials")
+    .getPublicUrl(filePath);
+
+  return data.publicUrl;
+}
+
 function renderMaterials() {
-  const visibleMaterials = getVisibleMaterials();
+  const filteredMaterials = getFilteredMaterials();
+  const list = isExpanded
+    ? filteredMaterials
+    : filteredMaterials.slice(0, visibleCount);
 
   materialGrid.innerHTML = "";
-
-  const list = isExpanded ? visibleMaterials : visibleMaterials.slice(0, visibleCount);
 
   if (list.length === 0) {
     materialGrid.innerHTML = `
@@ -154,18 +165,24 @@ function renderMaterials() {
   }
 
   list.forEach(function(material) {
-    const realIndex = materials.indexOf(material);
-    const fileColor = getFileColor(material.fileType);
+    const fileColor = getFileColor(material.file_type);
+    const fileUrl = getPublicUrl(material.file_path);
+
+    const canEdit =
+      currentTeacher && currentTeacher.id === material.teacher_id;
 
     const card = document.createElement("div");
     card.className = "material-card";
 
     card.innerHTML = `
-      <div class="file-type ${fileColor}">${material.fileType}</div>
+      <div class="file-type ${fileColor}">
+        ${material.file_type || "FILE"}
+      </div>
 
       <div class="material-content">
         <div class="material-topline">
           <span>${material.category} • ${material.grade}</span>
+
           <em class="${material.visibility === "public" ? "public-tag" : "private-tag"}">
             ${material.visibility === "public" ? "Public" : "Private"}
           </em>
@@ -175,18 +192,20 @@ function renderMaterials() {
         <p>${material.description}</p>
 
         <div class="material-meta">
-          <small>${material.teacher}</small>
-          <small>${material.date}</small>
+          <small>${material.teacher_name}</small>
+          <small>${formatDate(material.created_at)}</small>
         </div>
 
         <div class="material-actions">
-          <a href="${material.fileData}" class="view-btn" target="_blank">Материал харах</a>
+          <a href="${fileUrl}" class="view-btn" target="_blank">
+            Материал харах
+          </a>
 
           ${
-            currentTeacher
+            canEdit
               ? `
-                <button class="edit-btn" onclick="editMaterial(${realIndex})">Засах</button>
-                <button class="delete-btn" onclick="deleteMaterial(${realIndex})">Устгах</button>
+                <button class="edit-btn" onclick="editMaterial('${material.id}')">Засах</button>
+                <button class="delete-btn" onclick="deleteMaterial('${material.id}', '${material.file_path}')">Устгах</button>
               `
               : ""
           }
@@ -197,7 +216,7 @@ function renderMaterials() {
     materialGrid.appendChild(card);
   });
 
-  if (visibleMaterials.length > visibleCount) {
+  if (filteredMaterials.length > visibleCount) {
     seeMoreBtn.style.display = "inline-block";
     seeMoreBtn.textContent = isExpanded ? "Show less" : "See more...";
   } else {
@@ -214,6 +233,7 @@ document.querySelectorAll(".filter-buttons button").forEach(function(button) {
     button.classList.add("active");
     currentFilter = button.dataset.filter;
     isExpanded = false;
+
     renderMaterials();
   });
 });
@@ -228,7 +248,7 @@ seeMoreBtn.addEventListener("click", function() {
   renderMaterials();
 });
 
-materialForm.addEventListener("submit", function(event) {
+materialForm.addEventListener("submit", async function(event) {
   event.preventDefault();
 
   if (!currentTeacher) {
@@ -236,60 +256,90 @@ materialForm.addEventListener("submit", function(event) {
     return;
   }
 
-  const editIndex = document.getElementById("editIndex").value;
   const file = document.getElementById("materialFile").files[0];
 
-  const materialData = {
-    category: document.getElementById("materialCategory").value,
-    grade: document.getElementById("materialGrade").value,
-    title: document.getElementById("materialTitle").value,
-    description: document.getElementById("materialDescription").value,
-    teacher: currentTeacher.name,
-    date: getTodayDate(),
-    visibility: document.getElementById("materialVisibility").value
-  };
+  let filePath = editingFilePath;
+  let fileName = null;
+  let fileType = null;
 
   if (file) {
-    const reader = new FileReader();
+    fileName = file.name;
+    fileType = getFileType(file.name);
 
-    reader.onload = function() {
-      materialData.fileType = getFileType(file.name);
-      materialData.fileData = reader.result;
+    filePath = `${currentTeacher.id}/${Date.now()}-${file.name}`;
 
-      saveMaterialData(editIndex, materialData);
-    };
+    const { error: uploadError } = await supabaseClient
+      .storage
+      .from("materials")
+      .upload(filePath, file);
 
-    reader.readAsDataURL(file);
-  } else {
-    if (editIndex === "") {
-      alert("Шинэ материал нэмэхдээ файл сонгоно уу.");
+    if (uploadError) {
+      console.error(uploadError);
+      alert("Файл upload хийхэд алдаа гарлаа.");
       return;
     }
-
-    materialData.fileType = materials[editIndex].fileType;
-    materialData.fileData = materials[editIndex].fileData;
-
-    saveMaterialData(editIndex, materialData);
   }
+
+  if (!editingId && !file) {
+    alert("Шинэ материал нэмэхдээ файл сонгоно уу.");
+    return;
+  }
+
+  const materialData = {
+    title: document.getElementById("materialTitle").value,
+    description: document.getElementById("materialDescription").value,
+    category: document.getElementById("materialCategory").value,
+    grade: document.getElementById("materialGrade").value,
+    visibility: document.getElementById("materialVisibility").value,
+
+    teacher_id: currentTeacher.id,
+    teacher_name: getTeacherDisplayName(currentTeacher),
+
+    file_name: fileName || null,
+    file_path: filePath,
+    file_type: fileType || getFileType(filePath)
+  };
+
+  if (editingId) {
+    const { error } = await supabaseClient
+      .from("materials")
+      .update(materialData)
+      .eq("id", editingId);
+
+    if (error) {
+      console.error(error);
+      alert("Материал засахад алдаа гарлаа.");
+      return;
+    }
+  } else {
+    const { error } = await supabaseClient
+      .from("materials")
+      .insert(materialData);
+
+    if (error) {
+      console.error(error);
+      alert("Материал хадгалахад алдаа гарлаа.");
+      return;
+    }
+  }
+
+  resetForm();
+  await loadMaterials();
+  renderMaterials();
 });
 
-function saveMaterialData(editIndex, materialData) {
-  if (editIndex === "") {
-    materials.unshift(materialData);
-  } else {
-    materials[editIndex] = materialData;
-  }
+function editMaterial(id) {
+  const material = materials.find(function(item) {
+    return item.id === id;
+  });
 
-  saveMaterials();
-  resetForm();
-  renderMaterials();
-}
+  if (!material) return;
 
-function editMaterial(index) {
-  const material = materials[index];
+  editingId = material.id;
+  editingFilePath = material.file_path;
 
   formTitle.textContent = "Материал засах";
-  document.getElementById("editIndex").value = index;
+
   document.getElementById("materialCategory").value = material.category;
   document.getElementById("materialGrade").value = material.grade;
   document.getElementById("materialTitle").value = material.title;
@@ -302,23 +352,40 @@ function editMaterial(index) {
   });
 }
 
-function deleteMaterial(index) {
+async function deleteMaterial(id, filePath) {
   const ok = confirm("Энэ материалыг устгах уу?");
 
   if (!ok) return;
 
-  materials.splice(index, 1);
-  saveMaterials();
+  const { error } = await supabaseClient
+    .from("materials")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.error(error);
+    alert("Материал устгахад алдаа гарлаа.");
+    return;
+  }
+
+  if (filePath) {
+    await supabaseClient
+      .storage
+      .from("materials")
+      .remove([filePath]);
+  }
+
+  await loadMaterials();
   renderMaterials();
 }
 
 function resetForm() {
   materialForm.reset();
-  document.getElementById("editIndex").value = "";
+  editingId = null;
+  editingFilePath = null;
   formTitle.textContent = "Шинэ материал нэмэх";
 }
 
 cancelEditBtn.addEventListener("click", resetForm);
 
-initAuthUI();
-renderMaterials();
+initPage();
