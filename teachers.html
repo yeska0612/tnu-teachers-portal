@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="mn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>ТНУ багш нар</title>
+
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/teachers.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="container nav">
+        <div class="logo">
+          <div class="logo-icon">
+            <img src="logo.jpg" alt="ТНУ лого" />
+          </div>
+
+          <div>
+            <h2>Түүх, нийгмийн ухааны судлагдахуун</h2>
+            <p>Багш нарын мэдээлэл</p>
+          </div>
+        </div>
+
+        <nav>
+          <a href="index.html">Нүүр</a>
+          <a href="teachers.html">Багш нар</a>
+          <a href="training.html">Сургалт</a>
+        </nav>
+      </div>
+    </header>
+
+    <section class="teacher-page-hero">
+      <div class="container">
+        <span class="teacher-badge">Манай хамт олон</span>
+        <h1>Түүх, нийгмийн ухааны багш нар</h1>
+        <p>
+          ТНУ-ийн багш нарын товч танилцуулга, заадаг хичээл, туршлага,
+          боловсрол, амжилт болон холбоо барих мэдээллийг нэг дороос харах
+          боломжтой.
+        </p>
+      </div>
+    </section>
+
+    <section class="teachers-section">
+      <div class="container">
+        <div class="section-title">
+          <span>ТНУ-ийн хамт олон</span>
+          <h2>Багш нарын бүрэлдэхүүн</h2>
+        </div>
+
+        <div class="teachers-grid" id="teachersGrid"></div>
+      </div>
+    </section>
+
+    <section class="achievements-section">
+      <div class="container">
+        <div class="section-title">
+          <span>Амжилт, үйл ажиллагаа</span>
+          <h2>ТНУ тэнхимийн онцлох амжилтууд</h2>
+          <p>
+            Манай багш нарын бүлгийн зохион байгуулсан сургалт, олимпиад,
+            өдөрлөг, судалгааны ажил болон сурагчдын амжилтууд.
+          </p>
+        </div>
+
+        <div class="achievement-grid">
+          <div class="achievement-card">
+            <div class="achievement-img img-one"></div>
+            <div class="achievement-content">
+              <span>Олимпиад</span>
+              <h3>Дүүргийн түүхийн олимпиадад амжилттай оролцов</h3>
+              <p>
+                ТНУ-ийн багш нарын бэлтгэсэн сурагчид түүх, нийгэм судлалын
+                олимпиадад амжилттай оролцож шагналт байр эзэллээ.
+              </p>
+            </div>
+          </div>
+
+          <div class="achievement-card">
+            <div class="achievement-img img-two"></div>
+            <div class="achievement-content">
+              <span>Мэтгэлцээн</span>
+              <h3>Сурагчдын нийгмийн асуудлаарх хэлэлцүүлэг</h3>
+              <p>
+                Сурагчдын шүүмжлэлт сэтгэлгээ, илтгэх чадвар, өөрийн байр сууриа
+                хамгаалах чадварыг хөгжүүлэх хэлэлцүүлэг зохион байгууллаа.
+              </p>
+            </div>
+          </div>
+
+          <div class="achievement-card">
+            <div class="achievement-img img-three"></div>
+            <div class="achievement-content">
+              <span>ЭЕШ бэлтгэл</span>
+              <h3>Элсэлтийн ерөнхий шалгалтын эрчимжүүлсэн сургалт</h3>
+              <p>
+                12-р ангийн сурагчдад зориулсан ЭЕШ-ийн бэлтгэл сургалтыг зохион
+                байгуулж, түүх, нийгмийн ухааны хичээлийн давтлага, сорил
+                шалгалт болон бодлого ажиллах арга зүйгээр дэмжин ажиллалаа.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="teacher-modal" id="teacherModal">
+      <div class="modal-box">
+        <button class="modal-close" onclick="closeTeacherModal()">×</button>
+
+        <div class="modal-top">
+          <img id="modalImage" src="" alt="Багшийн зураг" />
+
+          <div>
+            <h2 id="modalName"></h2>
+            <p id="modalSubject"></p>
+            <span id="modalRole"></span>
+          </div>
+        </div>
+
+        <div class="modal-info-grid">
+          <div class="modal-info-card">
+            <h3>Ажлын туршлага</h3>
+            <p id="modalExperience"></p>
+          </div>
+
+          <div class="modal-info-card">
+            <h3>Боловсрол</h3>
+            <p id="modalEducation"></p>
+          </div>
+
+          <div class="modal-info-card">
+            <h3>Заадаг хичээл</h3>
+            <p id="modalLessons"></p>
+          </div>
+
+          <div class="modal-info-card">
+            <h3>Онцлох чадвар</h3>
+            <p id="modalSkill"></p>
+          </div>
+
+          <div class="modal-info-card wide">
+            <h3>Багшийн товч танилцуулга</h3>
+            <p id="modalAbout"></p>
+          </div>
+
+          <div class="modal-info-card">
+            <h3>Холбоо барих</h3>
+            <p id="modalContact"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="container footer-content">
+        <p>© 2026 Түүх, нийгмийн ухааны багш нарын бүлэг</p>
+        <p>Нийслэлийн ерөнхий боловсролын 87-р сургууль</p>
+      </div>
+    </footer>
+
+    <script src="js/teachers.js"></script>
+  </body>
+</html>
